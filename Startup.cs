@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DATINGAPP.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -35,8 +36,10 @@ namespace DATINGAPP.API
             services.AddDbContext<DataContext>(x=> x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddCors();
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
 
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IDatingREpository, DatingRepository>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
