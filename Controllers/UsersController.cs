@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using DATINGAPP.API.Data;
@@ -42,6 +43,22 @@ namespace DATINGAPP.API.Controllers
             var userToReturn = mapper.Map<UserForDetailedDto>(user);
 
             return Ok(userToReturn);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var userFromRepo = await repo.GetUser(id);
+
+            mapper.Map(userForUpdateDto, userFromRepo);
+
+            if (await repo.SaveAll())
+                return NoContent();
+
+            throw new Exception($"მომხმარებლის განახლება {id} ვერ შეინახა");
         }
     }
 }
