@@ -7,6 +7,7 @@ using AutoMapper;
 using DATINGAPP.API.Data;
 using DATINGAPP.API.Dtos;
 using DATINGAPP.API.Helpers;
+using DATINGAPP.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -73,6 +74,35 @@ namespace DATINGAPP.API.Controllers
                 return NoContent();
 
             throw new Exception($"მომხმარებლის განახლება {id} ვერ შეინახა");
+        }
+
+        [HttpPost("{id}/like/{recepientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recepientId)
+        {
+
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var like = await repo.GetLike(id, recepientId);
+
+            if (like != null)
+                return BadRequest("უკვე მოწონებული გყავს");
+
+            if (await repo.GetUser(recepientId) == null)
+                return NotFound();
+
+            like = new Like
+            {
+                LikerId = id,
+                LikeeId = recepientId
+            };
+
+            repo.Add<Like>(like);
+
+            if (await repo.SaveAll())
+                return Ok();
+
+            return BadRequest("ვერ მოხერხდა მოწონება");
         }
     }
 }
